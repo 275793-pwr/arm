@@ -117,21 +117,27 @@ int main(void)
   while (1)
   {
 
-	  for (int i = 0; i < 4; ++i) {
 
-		  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-		  HAL_Delay(250);
-		  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
-		  HAL_Delay(250);
-		  HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
-		  HAL_Delay(250);
-		  if (i > 1)
-		  {
-			  HAL_GPIO_TogglePin(LD6_GPIO_Port, LD6_Pin);
-			  HAL_Delay(250);
+	  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_SET);
+//	  HAL_Delay(500);
 
-		  }
-	}
+	  uint32_t tickstart = HAL_GetTick();
+	  uint32_t wait = 500;
+
+	  if (wait < HAL_MAX_DELAY)
+	  {
+	    wait += (uint32_t)(uwTickFreq);
+	  }
+
+	  while((HAL_GetTick() - tickstart) < wait)
+	  {
+		  HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, HAL_GPIO_ReadPin(BTN_GPIO_Port, BTN_Pin));
+	  }
+
+	  HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+	  HAL_GPIO_WritePin(LD4_GPIO_Port, LD4_Pin, GPIO_PIN_RESET);
+	  HAL_Delay(500);
+
 
 
     /* USER CODE END WHILE */
@@ -402,11 +408,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(OTG_FS_PowerSwitchOn_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PA0 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
+  /*Configure GPIO pin : BTN_Pin */
+  GPIO_InitStruct.Pin = BTN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(BTN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : LD4_Pin LD3_Pin LD5_Pin LD6_Pin
                            Audio_RST_Pin */
