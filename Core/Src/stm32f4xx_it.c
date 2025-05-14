@@ -57,7 +57,7 @@
 /* External variables --------------------------------------------------------*/
 extern HCD_HandleTypeDef hhcd_USB_OTG_FS;
 /* USER CODE BEGIN EV */
-
+static uint32_t systick_counter = 0;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -72,7 +72,7 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-   while (1)
+  while (1)
   {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
@@ -187,7 +187,11 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  systick_counter++;
+  if (systick_counter >= 500) {
+    HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin); // Toggle LD4 (Green LED)
+    systick_counter = 0;
+  }
   /* USER CODE END SysTick_IRQn 1 */
 }
 
