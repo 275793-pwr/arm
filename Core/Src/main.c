@@ -116,25 +116,14 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim3);
-  HAL_TIM_Base_Start(&htim4);
+  HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
   while (1) {
     /* USER CODE BEGIN WHILE */
-    
-	  if (__HAL_TIM_GET_COUNTER(&htim4) > 500) {
-		  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
-		  __HAL_TIM_SET_COUNTER(&htim4, 0);
-	  }
-	  if (__HAL_TIM_GET_COUNTER(&htim3) > 1500) {
-		  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-		  HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
-		  __HAL_TIM_SET_COUNTER(&htim3, 0);
-	  }
 
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
@@ -368,9 +357,9 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 16383;
+  htim3.Init.Prescaler = 332;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
+  htim3.Init.Period = 9599;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
@@ -410,12 +399,14 @@ static void MX_TIM4_Init(void)
   TIM_MasterConfigTypeDef sMasterConfig = {0};
 
   /* USER CODE BEGIN TIM4_Init 1 */
+// Timer frequency = System clock / (Prescaler + 1) / (Period + 1)
+// 1 = 96M / (10k) / (9k6)
 
   /* USER CODE END TIM4_Init 1 */
   htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 16383;
+  htim4.Init.Prescaler = 1999;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 32767;
+  htim4.Init.Period = 9599;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
