@@ -56,7 +56,6 @@
 
 /* External variables --------------------------------------------------------*/
 extern HCD_HandleTypeDef hhcd_USB_OTG_FS;
-extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 /* USER CODE BEGIN EV */
 
@@ -201,19 +200,18 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
-  * @brief This function handles TIM3 global interrupt.
+  * @brief This function handles EXTI line0 interrupt.
   */
-void TIM3_IRQHandler(void)
+void EXTI0_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM3_IRQn 0 */
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
 
-  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
-  // HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
-  /* USER CODE END TIM3_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim3);
-  /* USER CODE BEGIN TIM3_IRQn 1 */
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+  HAL_GPIO_TogglePin(LD5_GPIO_Port, LD6_Pin);
 
-  /* USER CODE END TIM3_IRQn 1 */
+  /* USER CODE END EXTI0_IRQn 1 */
 }
 
 /**
