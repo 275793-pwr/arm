@@ -116,13 +116,25 @@ int main(void)
   MX_TIM4_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim3);
+  HAL_TIM_Base_Start(&htim4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  // LED blinking is now handled by SysTick interrupt
+  HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
   while (1) {
     /* USER CODE BEGIN WHILE */
+    
+	  if (__HAL_TIM_GET_COUNTER(&htim4) > 500) {
+		  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
+		  __HAL_TIM_SET_COUNTER(&htim4, 0);
+	  }
+	  if (__HAL_TIM_GET_COUNTER(&htim3) > 1500) {
+		  HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+		  HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
+		  __HAL_TIM_SET_COUNTER(&htim3, 0);
+	  }
 
     /* USER CODE END WHILE */
     MX_USB_HOST_Process();
