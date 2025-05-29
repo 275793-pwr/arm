@@ -48,8 +48,7 @@ I2S_HandleTypeDef hi2s3;
 
 SPI_HandleTypeDef hspi1;
 
-TIM_HandleTypeDef htim3;
-TIM_HandleTypeDef htim4;
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 
@@ -63,8 +62,7 @@ static void MX_I2C1_Init(void);
 static void MX_I2S2_Init(void);
 static void MX_I2S3_Init(void);
 static void MX_SPI1_Init(void);
-static void MX_TIM4_Init(void);
-static void MX_TIM3_Init(void);
+static void MX_USART2_UART_Init(void);
 void MX_USB_HOST_Process(void);
 
 /* USER CODE BEGIN PFP */
@@ -113,12 +111,11 @@ int main(void)
   MX_I2S3_Init();
   MX_SPI1_Init();
   // MX_USB_HOST_Init();
-  MX_TIM4_Init();
-  MX_TIM3_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   // HAL_TIM_Base_Start_IT(&htim3);
-  HAL_TIM_Base_Start(&htim3);
-  HAL_TIM_Base_Start_IT(&htim4);
+  // HAL_TIM_Base_Start(&htim3);
+  // HAL_TIM_Base_Start_IT(&htim4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -131,12 +128,10 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     // HAL_GPIO_TogglePin(LD5_GPIO_Port, LD5_Pin);
-    // HAL_Delay(250);
+    HAL_Delay(250);
     
-	  if (__HAL_TIM_GET_COUNTER(&htim3) > 243) {
-		  HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
-		  __HAL_TIM_SET_COUNTER(&htim3, 0);
-	  }
+    uint8_t data[] = "dsa";
+    HAL_UART_Transmit(&huart2, data, 3, 32767);
   }
   /* USER CODE END 3 */
 }
@@ -347,94 +342,35 @@ static void MX_SPI1_Init(void)
 }
 
 /**
-  * @brief TIM3 Initialization Function
+  * @brief USART2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_TIM3_Init(void)
+static void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN TIM3_Init 0 */
+  /* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END TIM3_Init 0 */
+  /* USER CODE END USART2_Init 0 */
 
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
+  /* USER CODE BEGIN USART2_Init 1 */
 
-  /* USER CODE BEGIN TIM3_Init 1 */
-
-  /* USER CODE END TIM3_Init 1 */
-  htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 16383;
-  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim3.Init.Period = 65535;
-  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
   {
     Error_Handler();
   }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM3_Init 2 */
+  /* USER CODE BEGIN USART2_Init 2 */
 
-  /* USER CODE END TIM3_Init 2 */
-
-}
-
-/**
-  * @brief TIM4 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM4_Init(void)
-{
-
-  /* USER CODE BEGIN TIM4_Init 0 */
-
-  /* USER CODE END TIM4_Init 0 */
-
-  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM4_Init 1 */
-// Timer frequency = System clock / (Prescaler + 1) / (Period + 1)
-// 1 = 96M / (10k) / (9k6)
-
-  /* USER CODE END TIM4_Init 1 */
-  htim4.Instance = TIM4;
-  htim4.Init.Prescaler = 999;
-  htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 3999;
-  htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_Base_Init(&htim4) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-  if (HAL_TIM_ConfigClockSource(&htim4, &sClockSourceConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM4_Init 2 */
-
-  /* USER CODE END TIM4_Init 2 */
+  /* USER CODE END USART2_Init 2 */
 
 }
 
