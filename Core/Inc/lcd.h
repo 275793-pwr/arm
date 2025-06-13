@@ -8,7 +8,7 @@
 #ifndef LCD_H_
 #define LCD_H_
 
-#include "stm32f4xx_hal.h"
+#include "stm32f1xx_hal.h"
 #include "string.h"
 #include "stdio.h"
 #include "main.h"
