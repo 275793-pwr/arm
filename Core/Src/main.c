@@ -101,7 +101,7 @@ int main(void)
 
   lcd = Lcd_create(ports, pins, GPIOA, LCD_RS_Pin, GPIOA, LCD_EN_Pin, LCD_4_BIT_MODE);
 
-  Lcd_string(&lcd, "STM32");
+  Lcd_string(&lcd, "STM32 F103");
   
   Lcd_cursor(&lcd, 1,0);
   Lcd_string(&lcd, "> option 1");

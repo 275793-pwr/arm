@@ -7,23 +7,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         000013a0  0800010c  0800010c  0000110c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00000054  080014ac  080014ac  000024ac  2**2
+  2 .rodata       00000058  080014ac  080014ac  000024ac  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08001500  08001500  0000300c  2**0
-                  CONTENTS
-  4 .ARM          00000008  08001500  08001500  00002500  2**2
+  3 .ARM.extab    00000000  08001504  08001504  0000300c  2**0
+                  CONTENTS, READONLY
+  4 .ARM          00000008  08001504  08001504  00002504  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .preinit_array 00000000  08001508  08001508  0000300c  2**0
+  5 .preinit_array 00000000  0800150c  0800150c  0000300c  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  08001508  08001508  00002508  2**2
+  6 .init_array   00000004  0800150c  0800150c  0000250c  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  7 .fini_array   00000004  0800150c  0800150c  0000250c  2**2
+  7 .fini_array   00000004  08001510  08001510  00002510  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  8 .data         0000000c  20000000  08001510  00003000  2**2
+  8 .data         0000000c  20000000  08001514  00003000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          00000020  2000000c  0800151c  0000300c  2**2
+  9 .bss          00000020  2000000c  08001520  0000300c  2**2
                   ALLOC
- 10 ._user_heap_stack 00000604  2000002c  0800151c  0000302c  2**0
+ 10 ._user_heap_stack 00000604  2000002c  08001520  0000302c  2**0
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  0000300c  2**0
                   CONTENTS, READONLY
@@ -35,17 +35,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  15 .debug_rnglists 00000310  00000000  00000000  00007680  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00016958  00000000  00000000  00007990  2**0
+ 16 .debug_macro  000169a6  00000000  00000000  00007990  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00005bba  00000000  00000000  0001e2e8  2**0
+ 17 .debug_line   0000550d  00000000  00000000  0001e336  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0007f770  00000000  00000000  00023ea2  2**0
+ 18 .debug_str    0007f891  00000000  00000000  00023843  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000a3612  2**0
+ 19 .comment      00000043  00000000  00000000  000a30d4  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00000ec4  00000000  00000000  000a3658  2**2
+ 20 .debug_frame  00000ec4  00000000  00000000  000a3118  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 00000051  00000000  00000000  000a451c  2**0
+ 21 .debug_line_str 00000047  00000000  00000000  000a3fdc  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -144,7 +144,7 @@ void MX_GPIO_Init(void)
  80001b2:	4814      	ldr	r0, [pc, #80]	@ (8000204 <MX_GPIO_Init+0xa8>)
  80001b4:	f000 fd4c 	bl	8000c50 <HAL_GPIO_WritePin>
 
-  /*Configure GPIO pins : PBPin PBPin PBPin PBPin */
+  /*Configure GPIO pins : LCD_D7_Pin LCD_D6_Pin LCD_D5_Pin LCD_D4_Pin */
   GPIO_InitStruct.Pin = LCD_D7_Pin|LCD_D6_Pin|LCD_D5_Pin|LCD_D4_Pin;
  80001b8:	f44f 4370 	mov.w	r3, #61440	@ 0xf000
  80001bc:	60bb      	str	r3, [r7, #8]
@@ -163,7 +163,7 @@ void MX_GPIO_Init(void)
  80001d0:	480b      	ldr	r0, [pc, #44]	@ (8000200 <MX_GPIO_Init+0xa4>)
  80001d2:	f000 fbb9 	bl	8000948 <HAL_GPIO_Init>
 
-  /*Configure GPIO pins : PAPin PAPin */
+  /*Configure GPIO pins : LCD_EN_Pin LCD_RS_Pin */
   GPIO_InitStruct.Pin = LCD_EN_Pin|LCD_RS_Pin;
  80001d6:	f44f 63c0 	mov.w	r3, #1536	@ 0x600
  80001da:	60bb      	str	r3, [r7, #8]
@@ -389,7 +389,7 @@ void Lcd_cursor(Lcd_HandleTypeDef * lcd, uint8_t row, uint8_t col)
  800031a:	3708      	adds	r7, #8
  800031c:	46bd      	mov	sp, r7
  800031e:	bd80      	pop	{r7, pc}
- 8000320:	080014d8 	.word	0x080014d8
+ 8000320:	080014dc 	.word	0x080014dc
 
 08000324 <lcd_write_command>:
 
@@ -663,7 +663,7 @@ int main(void)
  80004b6:	e895 0003 	ldmia.w	r5, {r0, r1}
  80004ba:	e884 0003 	stmia.w	r4, {r0, r1}
 
-  Lcd_string(&lcd, "STM32");
+  Lcd_string(&lcd, "STM32 F103");
  80004be:	f107 0318 	add.w	r3, r7, #24
  80004c2:	490c      	ldr	r1, [pc, #48]	@ (80004f4 <main+0x98>)
  80004c4:	4618      	mov	r0, r3
@@ -688,11 +688,11 @@ int main(void)
   while (1)
  80004e4:	bf00      	nop
  80004e6:	e7fd      	b.n	80004e4 <main+0x88>
- 80004e8:	080014c0 	.word	0x080014c0
- 80004ec:	080014d0 	.word	0x080014d0
+ 80004e8:	080014c4 	.word	0x080014c4
+ 80004ec:	080014d4 	.word	0x080014d4
  80004f0:	40010800 	.word	0x40010800
  80004f4:	080014ac 	.word	0x080014ac
- 80004f8:	080014b4 	.word	0x080014b4
+ 80004f8:	080014b8 	.word	0x080014b8
 
 080004fc <SystemClock_Config>:
 /**
@@ -1121,7 +1121,7 @@ LoopFillZerobss:
   ldr r1, =_edata
  8000660:	2000000c 	.word	0x2000000c
   ldr r2, =_sidata
- 8000664:	08001510 	.word	0x08001510
+ 8000664:	08001514 	.word	0x08001514
   ldr r2, =_sbss
  8000668:	2000000c 	.word	0x2000000c
   ldr r4, =_ebss
@@ -1224,7 +1224,7 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
     HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority, 0U);
  80006d4:	2200      	movs	r2, #0
  80006d6:	6879      	ldr	r1, [r7, #4]
- 80006d8:	f04f 30ff 	mov.w	r0, #4294967295
+ 80006d8:	f04f 30ff 	mov.w	r0, #4294967295	@ 0xffffffff
  80006dc:	f000 f90b 	bl	80008f6 <HAL_NVIC_SetPriority>
     uwTickPrio = TickPriority;
  80006e0:	4a06      	ldr	r2, [pc, #24]	@ (80006fc <HAL_InitTick+0x5c>)
@@ -1315,7 +1315,7 @@ __weak void HAL_Delay(uint32_t Delay)
   /* Add a freq to guarantee minimum wait */
   if (wait < HAL_MAX_DELAY)
  800074a:	68fb      	ldr	r3, [r7, #12]
- 800074c:	f1b3 3fff 	cmp.w	r3, #4294967295
+ 800074c:	f1b3 3fff 	cmp.w	r3, #4294967295	@ 0xffffffff
  8000750:	d005      	beq.n	800075e <HAL_Delay+0x26>
   {
     wait += (uint32_t)(uwTickFreq);
@@ -1515,7 +1515,7 @@ __STATIC_INLINE uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t P
 
   return (
            ((PreemptPriority & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL)) << SubPriorityBits) |
- 800086c:	f04f 32ff 	mov.w	r2, #4294967295
+ 800086c:	f04f 32ff 	mov.w	r2, #4294967295	@ 0xffffffff
  8000870:	69bb      	ldr	r3, [r7, #24]
  8000872:	fa02 f303 	lsl.w	r3, r2, r3
  8000876:	43da      	mvns	r2, r3
@@ -1524,7 +1524,7 @@ __STATIC_INLINE uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t P
  800087c:	697b      	ldr	r3, [r7, #20]
  800087e:	409a      	lsls	r2, r3
            ((SubPriority     & (uint32_t)((1UL << (SubPriorityBits    )) - 1UL)))
- 8000880:	f04f 31ff 	mov.w	r1, #4294967295
+ 8000880:	f04f 31ff 	mov.w	r1, #4294967295	@ 0xffffffff
  8000884:	697b      	ldr	r3, [r7, #20]
  8000886:	fa01 f303 	lsl.w	r3, r1, r3
  800088a:	43d9      	mvns	r1, r3
@@ -1569,7 +1569,7 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
  80008b8:	6053      	str	r3, [r2, #4]
   NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Interrupt */
  80008ba:	210f      	movs	r1, #15
- 80008bc:	f04f 30ff 	mov.w	r0, #4294967295
+ 80008bc:	f04f 30ff 	mov.w	r0, #4294967295	@ 0xffffffff
  80008c0:	f7ff ff90 	bl	80007e4 <__NVIC_SetPriority>
   SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
  80008c4:	4b05      	ldr	r3, [pc, #20]	@ (80008dc <SysTick_Config+0x40>)
@@ -3426,7 +3426,7 @@ if (((RCC_ClkInitStruct->ClockType) & RCC_CLOCKTYPE_PCLK1) == RCC_CLOCKTYPE_PCLK
  8001342:	bf00      	nop
  8001344:	40022000 	.word	0x40022000
  8001348:	40021000 	.word	0x40021000
- 800134c:	080014dc 	.word	0x080014dc
+ 800134c:	080014e0 	.word	0x080014e0
  8001350:	20000000 	.word	0x20000000
  8001354:	20000004 	.word	0x20000004
 
@@ -3561,8 +3561,8 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
  80013ea:	bf00      	nop
  80013ec:	40021000 	.word	0x40021000
  80013f0:	007a1200 	.word	0x007a1200
- 80013f4:	080014ec 	.word	0x080014ec
- 80013f8:	080014fc 	.word	0x080014fc
+ 80013f4:	080014f0 	.word	0x080014f0
+ 80013f8:	08001500 	.word	0x08001500
  80013fc:	003d0900 	.word	0x003d0900
 
 08001400 <RCC_Delay>:
@@ -3641,10 +3641,10 @@ static void RCC_Delay(uint32_t mdelay)
  800147e:	4798      	blx	r3
  8001480:	3601      	adds	r6, #1
  8001482:	e7f2      	b.n	800146a <__libc_init_array+0x1e>
- 8001484:	08001508 	.word	0x08001508
- 8001488:	08001508 	.word	0x08001508
- 800148c:	08001508 	.word	0x08001508
- 8001490:	0800150c 	.word	0x0800150c
+ 8001484:	0800150c 	.word	0x0800150c
+ 8001488:	0800150c 	.word	0x0800150c
+ 800148c:	0800150c 	.word	0x0800150c
+ 8001490:	08001510 	.word	0x08001510
 
 08001494 <_init>:
  8001494:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
