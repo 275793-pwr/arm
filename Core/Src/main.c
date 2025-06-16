@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -88,6 +89,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -101,10 +103,16 @@ int main(void)
 
   lcd = Lcd_create(ports, pins, GPIOA, LCD_RS_Pin, GPIOA, LCD_EN_Pin, LCD_4_BIT_MODE);
 
-  Lcd_string(&lcd, "STM32 F103");
+  Lcd_string(&lcd, "Hello World");
   
   Lcd_cursor(&lcd, 1,0);
-  Lcd_string(&lcd, "> option 1");
+  
+
+  const char* hello = "Hello World\0";
+
+
+  HAL_UART_Transmit(&huart2, hello, sizeof(hello), 32767);
+
 
   /* USER CODE END 2 */
 
