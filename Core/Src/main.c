@@ -126,6 +126,7 @@ int main(void)
   // TMC2209_setStallGuardThreshold(&htmc, 20);
   TMC2209_enable(&htmc);
   
+  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 
   /* USER CODE END 2 */
 
@@ -198,6 +199,11 @@ int main(void)
       // Lcd_cursor(&lcd, 0,0);
       // Lcd_int(&lcd, 0);
     }
+
+    if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) run = false;
+    Lcd_cursor(&lcd, 0, 0);
+    Lcd_int(&lcd, (TIM2->CNT)>>2);
+    HAL_Delay(100);
     
     
     /* USER CODE END WHILE */
