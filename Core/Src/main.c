@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -45,8 +46,11 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TMC2209_HandleTypeDef htmc;
+
 /* USER CODE BEGIN PV */
+
+TMC2209_HandleTypeDef htmc;
+Lcd_HandleTypeDef lcd;
 
 /* USER CODE END PV */
 
@@ -91,6 +95,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+  MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
 
 
@@ -100,7 +105,6 @@ int main(void)
 
   Lcd_PinType pins[] = {LCD_D4_Pin, LCD_D5_Pin, LCD_D6_Pin, LCD_D7_Pin};
 
-  Lcd_HandleTypeDef lcd;
 
   lcd = Lcd_create(ports, pins, GPIOA, LCD_RS_Pin, GPIOA, LCD_EN_Pin, LCD_4_BIT_MODE);
 
@@ -117,23 +121,84 @@ int main(void)
   htmc = TMC2209_create(&huart2, SERIAL_ADDRESS_0); // Assuming SERIAL_ADDRESS_0 is the desired address
   TMC2209_init(&htmc);
 
-  TMC2209_setRunCurrent(&htmc, 100);
-  TMC2209_setStallGuardThreshold(&htmc, 20);
+  
+  TMC2209_setRunCurrent(&htmc, 10);
+  // TMC2209_setStallGuardThreshold(&htmc, 20);
   TMC2209_enable(&htmc);
-  TMC2209_moveAtVelocity(&htmc, 30000);
   
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  const uint32_t DELAY = 1000;
+
+  uint32_t accel = 100;
+  uint32_t distance = 100;
+  float speed = 5000;
+  bool stealthchop = false;
+
+  bool run = true;
+  int current = 100;
+  bool configToSave = true;
+
+
   while (1)
   {
-    HAL_Delay(100);
-    uint16_t sg = TMC2209_getStallGuardResult(&htmc);
-    Lcd_cursor(&lcd, 0,0);
-    Lcd_int(&lcd, sg);
+    if (run)
+    {
+      if (configToSave)
+      {
+        if (stealthchop)
+        {
+          TMC2209_enableStealthChop(&htmc);
+        }
+        else
+        {
+          TMC2209_disableStealthChop(&htmc);
+        }
+      HAL_Delay(200);
+        TMC2209_setRunCurrent(&htmc, current);
+      HAL_Delay(200);
+      configToSave = false;
+      }
+      
+      for (int i = 0; i <= accel; i++)
+      {
+        TMC2209_moveAtVelocity(&htmc, speed * i / accel);
+        HAL_Delay(2);
+      }
+      TMC2209_moveAtVelocity(&htmc, speed);
+      HAL_Delay(distance * 10);
+      for (int i = accel; i > 0; i--)
+      {
+        TMC2209_moveAtVelocity(&htmc, speed * i / accel);
+        HAL_Delay(2);
+      }
+      HAL_Delay(100);
+
+      for (int i = 0; i <= accel; i++)
+      {
+        TMC2209_moveAtVelocity(&htmc, - speed * i / accel);
+        HAL_Delay(2);
+      }
+      TMC2209_moveAtVelocity(&htmc, -speed);
+      HAL_Delay(distance * 10);
+      for (int i = accel; i > 0; i--)
+      {
+        TMC2209_moveAtVelocity(&htmc, - speed * i / accel);
+        HAL_Delay(2);
+      }
+      HAL_Delay(100);
+    }
+    else
+    {
+      // TODO: lcd interface to control params
+      
+      // HAL_Delay(100);
+      // Lcd_cursor(&lcd, 0,0);
+      // Lcd_int(&lcd, 0);
+    }
+    
     
     /* USER CODE END WHILE */
 
