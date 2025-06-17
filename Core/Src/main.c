@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 
 #include "lcd.h"
+#include "TMC2209.h"
 
 /* USER CODE END Includes */
 
@@ -44,7 +45,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
+TMC2209_HandleTypeDef htmc;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -103,23 +104,37 @@ int main(void)
 
   lcd = Lcd_create(ports, pins, GPIOA, LCD_RS_Pin, GPIOA, LCD_EN_Pin, LCD_4_BIT_MODE);
 
-  Lcd_string(&lcd, "Hello World");
+  // Lcd_string(&lcd, "Hello World");
   
   Lcd_cursor(&lcd, 1,0);
   
 
-  const char* hello = "Hello World\0";
+  // const char* hello = "Hello World\0";
 
 
-  HAL_UART_Transmit(&huart2, hello, sizeof(hello), 32767);
+  // HAL_UART_Transmit(&huart2, hello, sizeof(hello), 32767);
 
+  htmc = TMC2209_create(&huart2, SERIAL_ADDRESS_0); // Assuming SERIAL_ADDRESS_0 is the desired address
+  TMC2209_init(&htmc);
+
+  TMC2209_setRunCurrent(&htmc, 100);
+  TMC2209_setStallGuardThreshold(&htmc, 20);
+  TMC2209_enable(&htmc);
+  TMC2209_moveAtVelocity(&htmc, 30000);
+  
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  const uint32_t DELAY = 1000;
   while (1)
   {
+    HAL_Delay(100);
+    uint16_t sg = TMC2209_getStallGuardResult(&htmc);
+    Lcd_cursor(&lcd, 0,0);
+    Lcd_int(&lcd, sg);
+    
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

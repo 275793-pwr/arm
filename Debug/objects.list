@@ -1,3 +1,4 @@
+"./Core/Src/TMC2209.o"
 "./Core/Src/gpio.o"
 "./Core/Src/lcd.o"
 "./Core/Src/main.o"
