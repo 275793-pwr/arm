@@ -189,15 +189,33 @@ int main(void)
   float speed = 5000;
   bool stealthchop = false;
 
-  bool run = true;
+  bool run = false;
   int current = 100;
-  bool configToSave = true;
+  bool last_changed;
 
+  // Menu items
+  const char* menuItems[] = {
+    "accel",
+    "distance",
+    "speed",
+    "stealthchop",
+    "current",
+    "start"
+  };
+  const int numMenuItems = sizeof(menuItems) / sizeof(menuItems[0]);
+
+  int selectedMenuItem = 0;
+  uint32_t encoderValue = 0;
+  uint32_t initialEncoderValue = 0;
+  bool adjustingParameter = false;
 
   while (1)
   {
     if (run)
     {
+      Lcd_clear(&lcd);
+      Lcd_cursor(&lcd, 0, 0);
+      Lcd_string(&lcd, "RUNNING...");
       TMC2209_enable(&htmc);
       if (stealthchop)
       {
@@ -217,20 +235,158 @@ int main(void)
       TMC2209_setRunCurrent(&htmc, 10);
       TMC2209_disable(&htmc);
       run = false;
+      while (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)); // Wait for button release
     }
     else
     {
-      // TODO: lcd interface to control params
+      if (!adjustingParameter)
+      {
+        // Menu navigation
+        encoderValue = (TIM2->CNT) >> 2;
+        int menuIndex = (encoderValue - initialEncoderValue) % numMenuItems;
+        if (menuIndex < 0) menuIndex += numMenuItems;
+        selectedMenuItem = menuIndex;
+
+        // Display menu
+        Lcd_clear(&lcd);
+        Lcd_cursor(&lcd, 0, 0);
+        Lcd_string(&lcd, ">");
+
+        for (int i = 0; i < 2; i++) // Display only two items at a time
+        {
+          int itemIndex = (selectedMenuItem + i) % numMenuItems;
+          Lcd_cursor(&lcd, i, 1);
+          Lcd_string(&lcd, menuItems[itemIndex]);
+          Lcd_cursor(&lcd, i, 10); // Display values on the right side
+          switch (itemIndex)
+          {
+            case 0: // accel
+              Lcd_int(&lcd, accel);
+              break;
+            case 1: // distance
+              Lcd_int(&lcd, distance);
+              break;
+            case 2: // speed
+              Lcd_int(&lcd, speed);
+              break;
+            case 3: // stealthchop
+              if (stealthchop)
+              {
+                Lcd_string(&lcd, "true");
+              }
+              else
+              Lcd_string(&lcd, "false");
+              break;
+            case 4: // current
+              Lcd_int(&lcd, current);
+              break;
+            case 5: // start
+              Lcd_string(&lcd, "");
+              break;
+          }
+        }
+
+        // Select item
+        if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin))
+        {
+          HAL_Delay(100); // Debounce
+          if (selectedMenuItem == numMenuItems - 1) // Start selected
+          {
+            HAL_Delay(500); // Delay before starting
+            run = true;
+          }
+          else
+          {
+            adjustingParameter = true;
+            initialEncoderValue = (TIM2->CNT) >> 2; // Store initial value for adjustment
+          }
+          while (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)); // Wait for button release
+        }
+      }
+      else // Adjusting parameter
+      {
+        encoderValue = (TIM2->CNT) >> 2;
+        int diff = encoderValue - initialEncoderValue;
+
+        Lcd_clear(&lcd);
+        Lcd_cursor(&lcd, 0, 0);
+        Lcd_string(&lcd, menuItems[selectedMenuItem]);
+        Lcd_cursor(&lcd, 1, 0);
+        Lcd_string(&lcd, "Adjust:");
+
+        switch (selectedMenuItem)
+        {
+          case 0: // accel
+            accel += diff;
+            if (accel < 1) accel = 1;
+            if (accel > 200) accel = 200;
+            Lcd_cursor(&lcd, 1, 10);
+            Lcd_int(&lcd, accel);
+            break;
+          case 1: // distance
+            distance += diff;
+            if (distance < 10) distance = 10;
+            if (distance > 200) distance = 200;
+            Lcd_cursor(&lcd, 1, 10);
+            Lcd_int(&lcd, distance);
+            break;
+          case 2: // speed
+            speed += diff * 10; // Adjust speed in larger steps
+            if (speed < 100) speed = 100;
+            if (speed > 10000) speed = 10000;
+            Lcd_cursor(&lcd, 1, 10);
+            Lcd_int(&lcd, speed);
+            break;
+          case 3: // stealthchop
+            if (diff != 0) // Toggle on any encoder movement
+            {
+              stealthchop = !stealthchop;
+              initialEncoderValue = encoderValue; // Reset initial value after toggle
+            }
+            Lcd_cursor(&lcd, 1, 10);
+            if (stealthchop)
+            {
+              Lcd_string(&lcd, "true");
+            }
+            else
+            {
+              Lcd_string(&lcd, "false");
+            }
+            break;
+          case 4: // current
+            current += diff;
+            if (current < 2) current = 2;
+            if (current > 100) current = 100;
+            Lcd_cursor(&lcd, 1, 10);
+            Lcd_int(&lcd, current);
+            break;
+        }
+
+        initialEncoderValue = encoderValue; // Update initial value for continuous adjustment
+
+        // Exit adjustment
+        if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin))
+        {
+          HAL_Delay(100); // Debounce
+          adjustingParameter = false;
+          initialEncoderValue = (TIM2->CNT) >> 2; // Store initial value for menu navigation
+          while (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)); // Wait for button release
+        }
+      }
+      if (!last_changed)
+      {
+        // last_changed = !((TIM2->CNT) >> 2 == encoderValue && (HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)));
+        while ((TIM2->CNT) >> 2 == encoderValue && (HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)))
+        {
+          /* code */
+          HAL_Delay(10); // Reduced delay for smoother menu scrolling
+        }
+      }
+      last_changed = !((HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)));
       
-      // HAL_Delay(100);
-      // Lcd_cursor(&lcd, 0,0);
-      // Lcd_int(&lcd, 0);
     }
 
-    if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) run = false;
-    Lcd_cursor(&lcd, 0, 0);
-    Lcd_int(&lcd, (TIM2->CNT)>>2);
-    HAL_Delay(100);
+    
     
     
     /* USER CODE END WHILE */
