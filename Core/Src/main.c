@@ -57,11 +57,63 @@ Lcd_HandleTypeDef lcd;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+
+
+void handle_motor_movement(TMC2209_HandleTypeDef* htmc, uint32_t accel, uint32_t distance, float speed)
+{
+  while (true)
+  {
+
+    for (int i = 0; i <= accel; i++)
+    {
+      if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+      TMC2209_moveAtVelocity(htmc, speed * i / accel);
+      HAL_Delay(2);
+    }
+    if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+    TMC2209_moveAtVelocity(htmc, speed);
+    for (int j = 0; j < distance; j++)
+    {
+      if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+      HAL_Delay(10);
+    }
+    if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+    for (int i = accel; i > 0; i--)
+    {
+      if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+      TMC2209_moveAtVelocity(htmc, speed * i / accel);
+      HAL_Delay(2);
+    }
+    HAL_Delay(100);
+
+    for (int i = 0; i <= accel; i++)
+    {
+      if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+      TMC2209_moveAtVelocity(htmc, - speed * i / accel);
+      HAL_Delay(2);
+    }
+    if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+    TMC2209_moveAtVelocity(htmc, -speed);
+    for (int j = 0; j < distance; j++)
+    {
+      if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+      HAL_Delay(10);
+    }
+    if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+    for (int i = accel; i > 0; i--)
+    {
+      if (! HAL_GPIO_ReadPin(ENC_BTN_GPIO_Port, ENC_BTN_Pin)) return;
+      TMC2209_moveAtVelocity(htmc, - speed * i / accel);
+      HAL_Delay(2);
+    }
+  }
+
+}
 
 /* USER CODE END 0 */
 
@@ -122,12 +174,11 @@ int main(void)
   TMC2209_init(&htmc);
 
   
-  TMC2209_setRunCurrent(&htmc, 10);
   // TMC2209_setStallGuardThreshold(&htmc, 20);
-  TMC2209_enable(&htmc);
   
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 
+  TMC2209_disable(&htmc);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -147,49 +198,25 @@ int main(void)
   {
     if (run)
     {
-      if (configToSave)
+      TMC2209_enable(&htmc);
+      if (stealthchop)
       {
-        if (stealthchop)
-        {
-          TMC2209_enableStealthChop(&htmc);
-        }
-        else
-        {
-          TMC2209_disableStealthChop(&htmc);
-        }
+        TMC2209_enableStealthChop(&htmc);
+      }
+      else
+      {
+        TMC2209_disableStealthChop(&htmc);
+      }
       HAL_Delay(200);
-        TMC2209_setRunCurrent(&htmc, current);
+      TMC2209_setRunCurrent(&htmc, current);
       HAL_Delay(200);
-      configToSave = false;
-      }
-      
-      for (int i = 0; i <= accel; i++)
-      {
-        TMC2209_moveAtVelocity(&htmc, speed * i / accel);
-        HAL_Delay(2);
-      }
-      TMC2209_moveAtVelocity(&htmc, speed);
-      HAL_Delay(distance * 10);
-      for (int i = accel; i > 0; i--)
-      {
-        TMC2209_moveAtVelocity(&htmc, speed * i / accel);
-        HAL_Delay(2);
-      }
-      HAL_Delay(100);
 
-      for (int i = 0; i <= accel; i++)
-      {
-        TMC2209_moveAtVelocity(&htmc, - speed * i / accel);
-        HAL_Delay(2);
-      }
-      TMC2209_moveAtVelocity(&htmc, -speed);
-      HAL_Delay(distance * 10);
-      for (int i = accel; i > 0; i--)
-      {
-        TMC2209_moveAtVelocity(&htmc, - speed * i / accel);
-        HAL_Delay(2);
-      }
-      HAL_Delay(100);
+      handle_motor_movement(&htmc, accel, distance, speed);
+
+      TMC2209_moveAtVelocity(&htmc, 0);
+      TMC2209_setRunCurrent(&htmc, 10);
+      TMC2209_disable(&htmc);
+      run = false;
     }
     else
     {
